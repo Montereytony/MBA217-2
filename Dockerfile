@@ -1,6 +1,4 @@
 #
-#
-#
 # to do a test build by hand (instead of the automated hub.docker.com build) you
 # can do this:
 #
@@ -30,9 +28,10 @@ RUN /usr/bin/dpkg -i pandoc-2.1-1-amd64.deb
 RUN rm pandoc-2.1-1-amd64.deb
 
 #
-# Upgrade R 3.4.2 now
+# Upgrade R now
 #
 
+RUN conda update -n base conda
 RUN conda update -c r r-base
 
 RUN conda install \
@@ -66,6 +65,9 @@ RUN conda install \
 	r-stringr  \
 	r-processx  \
     r-reshape \
+    r-tidyverse \
+    r-readr \
+    r-mice  \
     r-progress 
 
 RUN conda install \
@@ -77,10 +79,11 @@ RUN conda install \
     seaborn \
     phantomjs  \
     statsmodels \
-    statsmodels \
     python-utils 
 
-
+    #mittner \
+RUN conda install -c conda-forge csvkit=1.0.2 
+RUN pip install scikit-neuralnetwork
 
 RUN conda install -c https://conda.anaconda.org/amueller wordcloud
 
@@ -95,9 +98,12 @@ RUN Rscript -e "install.packages('https://cran.r-project.org/src/contrib/mclust_
 RUN Rscript -e "install.packages('https://cran.r-project.org/src/contrib/pracma_2.1.1.tar.gz',repos=NULL)"
 RUN Rscript -e "install.packages('https://cran.r-project.org/src/contrib/ggdendro_0.1-20.tar.gz',repos=NULL)"
 RUN Rscript -e "install.packages('https://cran.r-project.org/src/contrib/GGally_1.3.2.tar.gz',repos=NULL)"
-RUN Rscript -e "install.packages('https://cran.r-project.org/src/contrib/miceadds_2.9-15.tar.gz',repos=NULL)"
+#RUN Rscript -e "install.packages('https://cran.r-project.org/src/contrib/miceadds_2.9-15.tar.gz',repos=NULL)"
 RUN Rscript -e "install.packages('https://cran.r-project.org/src/contrib/multiwayvcov_1.2.3.tar.gz',repos=NULL)"
 
+
+
+RUN pip install -e 'git://github.com/irskep/clubsandwich.git@master#egg=clubsandwich'
 
 #
 # NB extensions is not working when running it in jupyterhub kubernetes so adding this next line
@@ -105,14 +111,8 @@ RUN Rscript -e "install.packages('https://cran.r-project.org/src/contrib/multiwa
 RUN conda install -c conda-forge jupyter_contrib_nbextensions
 RUN jupyter nbextension install --py widgetsnbextension --sys-prefix
 RUN jupyter nbextension enable  --py widgetsnbextension --sys-prefix
-
-RUN conda install \
-    r-tidyverse \
-    r-readr
-RUN conda install -c conda-forge csvkit=1.0.2 
 #
 # This should allow users to turn off extension if they do not want them.
 #
 USER jovyan
-RUN pip install scikit-neuralnetwork
 RUN jupyter nbextensions_configurator enable
